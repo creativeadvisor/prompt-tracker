@@ -1,0 +1,16 @@
+.DS_Store
+.vscode/
+.idea/
+.claude/
+*.log
+
+# Env files anywhere in the repo (keys never enter the repo)
+.env
+.env.*
+!.env.example
+supabase/functions/.env
+
+# Supabase CLI state
+supabase/.branches/
+supabase/.temp/
+.obsidian/

@@ -1,0 +1,48 @@
+{
+  "name": "prompt-tracker",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/generate-routes.mjs && tsc -b && vite build",
+    "typecheck": "node scripts/generate-routes.mjs && tsc -b",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "gen:types": "cd .. && supabase gen types typescript --local > app/src/lib/database.types.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-query": "^5.102.8",
+    "@tanstack/react-router": "^1.170.36",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "diff": "9.0.0",
+    "lucide-react": "^1.45.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tanstack/router-generator": "1.167.36",
+    "@tanstack/router-plugin": "^1.168.38",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.10.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.6",
+    "globals": "^17.12.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.70.0",
+    "vite": "^8.3.0"
+  }
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Theme before first paint (mirrors src/lib/theme.ts): the stored
+         preference, else the OS setting (the default). The CSS itself falls
+         back to dark, so a blocked script still renders correctly. -->
+    <script>
+      ;(function () {
+        var c = 'dark'
+        try {
+          var p = localStorage.getItem('prompt-tracker:theme')
+          var light = matchMedia('(prefers-color-scheme: light)').matches
+          if (p === 'light' || (p !== 'dark' && light)) c = 'light'
+        } catch (e) {
+          /* storage blocked: stay dark */
+        }
+        document.documentElement.classList.add(c)
+      })()
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#101114" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Prompt Tracker</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

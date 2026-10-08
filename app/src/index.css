@@ -1,0 +1,487 @@
+@import "tailwindcss";
+
+/* `dark:` exists for index.css-only rules; it is lint-banned in components —
+   the tokens carry the theme. */
+@custom-variant dark (&:where(html.dark, html.dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens — three layers.
+
+   A. `@theme`        static values (fonts, radii, type scale)
+   B. `@theme inline` the PUBLIC semantic names every utility and component
+                      class uses (`--color-text`, `bg-surface-2`, …), each a
+                      var() reference into layer C. `inline` is required when
+                      a theme value references another variable: utilities
+                      then compile to `var(--t-text)` and resolve where they
+                      are used, so a theme can be swapped on `html` without
+                      touching call sites.
+   C. `:root` blocks  the RAW values (`--t-*`), one block per theme: dark is
+                      the CSS fallback (`:root, html.dark`), light is
+                      `html.light`; `lib/theme.ts` swaps the class — the
+                      default is the OS setting ("System"). The only place in
+                      the app a color literal may appear (ESLint bans them in
+                      components).
+
+   To restyle the app, edit layer C only. Keep every ink/surface pair above
+   4.5:1 in both themes.
+   ------------------------------------------------------------------------ */
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Type scale beyond Tailwind's defaults. No line-height companions: these
+     inherit the body's 1.55. */
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-13: 13px;
+  --text-15: 15px;
+  --text-17: 17px;
+  --text-22: 22px;
+
+  /* No max-width cap: the app fills the window with 24px side gutters. */
+  --container-app: none;
+}
+
+@theme inline {
+  /* Surfaces */
+  --color-bg: var(--t-bg);
+  --color-surface: var(--t-surface);
+  --color-surface-2: var(--t-surface-2);
+  --color-surface-elevated: var(--t-surface-elevated); /* popovers, modals */
+  --color-border-default: var(--t-border);
+  --color-border-strong: var(--t-border-strong);
+
+  /* Ink */
+  --color-text: var(--t-text);
+  --color-text-muted: var(--t-text-muted);
+  --color-text-soft: var(--t-text-soft);
+
+  /* Action */
+  --color-primary: var(--t-primary);
+  --color-primary-hover: var(--t-primary-hover);
+  --color-primary-soft: var(--t-primary-soft);
+  --color-primary-foreground: var(--t-primary-fg); /* the ink ON a primary fill */
+  --color-ring: var(--t-ring);                     /* the focus ring, every theme */
+
+  /* The inverted block — active filter chips, avatars: "the page, flipped".
+     Use this pair; never bg-text + text-white. */
+  --color-inverse: var(--t-inverse);
+  --color-inverse-fg: var(--t-inverse-fg);
+
+  /* Overlays sit over content, so they are theme-invariant. */
+  --color-backdrop: var(--t-backdrop);
+  --color-on-backdrop: var(--t-on-backdrop);
+
+  /* Links */
+  --color-accent-deep: var(--t-info);
+  --color-accent-soft: var(--t-info-soft);
+
+  /* States — deep ink on soft tint, both halves always */
+  --color-warm: var(--t-warm);
+  --color-warm-soft: var(--t-warm-soft);
+  --color-success: var(--t-success);
+  --color-success-soft: var(--t-success-soft);
+  --color-danger: var(--t-danger);
+  --color-danger-soft: var(--t-danger-soft);
+  --color-info: var(--t-info);
+  --color-info-soft: var(--t-info-soft);
+
+  /* AI provenance — marks what a model produced (judge pills, "seen in
+     answers"). The info pair, so it reads as "informational", not alarming. */
+  --color-agent: var(--t-info);
+  --color-agent-soft: var(--t-info-soft);
+
+  /* Charts */
+  --color-chart-1: var(--t-chart-1);
+  --color-chart-2: var(--t-chart-2);
+
+  /* The rail — its own register so it can differ from the page in any theme */
+  --color-sidebar: var(--t-sidebar);
+  --color-sidebar-fg: var(--t-sidebar-fg);
+  --color-sidebar-fg-strong: var(--t-sidebar-fg-strong);
+  --color-sidebar-hover: var(--t-sidebar-hover);
+  --color-sidebar-accent: var(--t-sidebar-accent);
+  --color-sidebar-border: var(--t-sidebar-border);
+
+  --shadow-card-sm: var(--t-shadow-sm);
+  --shadow-card-md: var(--t-shadow-md);
+  --shadow-card-lg: var(--t-shadow-lg);
+  --shadow-popover: var(--t-shadow-popover);
+}
+
+/* ---------------------------------------------------------------------------
+   Layer C — raw values. A neutral system: near-black and white grounds,
+   one blue accent for links and AI provenance, green/amber/red states. Every
+   ink clears 4.5:1 on every surface it sits on in its theme.
+
+   DARK is the CSS fallback (what renders if the pre-paint script is blocked);
+   the default is the OS setting, applied by lib/theme.ts.
+   ------------------------------------------------------------------------ */
+:root,
+html.dark {
+  color-scheme: dark;
+
+  --t-bg: #101114;                 /* the page */
+  --t-surface: #17181c;            /* cards, tables, inputs */
+  --t-surface-2: #212329;          /* wells, hovers, secondary fills */
+  --t-surface-elevated: #1c1d22;   /* popovers, modals — a step up */
+  --t-border: rgb(255 255 255 / 8%);
+  --t-border-strong: rgb(255 255 255 / 36%); /* input + button borders: ≥3:1 */
+
+  --t-text: #f2f3f5;
+  --t-text-muted: #a9adb6;
+  --t-text-soft: #8d919b;          /* the floor; there is no fainter text token */
+
+  --t-primary: #f2f3f5;            /* the light CTA on a dark page */
+  --t-primary-hover: #d9dbe0;
+  --t-primary-soft: rgb(242 243 245 / 15%);
+  --t-primary-fg: #17181c;
+  --t-ring: #8d919b;
+
+  --t-inverse: #f2f3f5;            /* the page, flipped */
+  --t-inverse-fg: #17181c;
+
+  --t-backdrop: #0b0c0e;
+  --t-on-backdrop: #ffffff;
+
+  --t-danger: #f0655d;
+  --t-danger-soft: #35191a;
+  --t-warm: #f2b43a;
+  --t-warm-soft: #352b15;
+  --t-info: #6b9cf5;               /* the accent — links + AI provenance */
+  --t-info-soft: #172238;
+  --t-success: #3dbb72;
+  --t-success-soft: #13291d;
+
+  --t-chart-1: #6b9cf5;
+  --t-chart-2: #3dbb72;
+
+  /* The rail is the page with a hairline edge, not a black bar. */
+  --t-sidebar: #101114;
+  --t-sidebar-fg: #a9adb6;
+  --t-sidebar-fg-strong: #f2f3f5;
+  --t-sidebar-hover: rgb(255 255 255 / 5%);
+  --t-sidebar-accent: #212329;
+  --t-sidebar-border: rgb(255 255 255 / 8%);
+
+  --t-shadow-sm: 0 1px 2px rgb(0 0 0 / 40%), 0 1px 3px rgb(0 0 0 / 50%);
+  --t-shadow-md: 0 8px 24px rgb(0 0 0 / 35%);
+  --t-shadow-lg: 0 26px 70px rgb(0 0 0 / 55%);
+  --t-shadow-popover: 0 10px 30px rgb(0 0 0 / 45%);
+
+  /* The `.form-select` chevron: a data URI can't read currentColor or a
+     var(), so its stroke is declared here beside the ink it mirrors
+     (--t-text-soft) and each theme block carries its own copy. */
+  --t-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238d919b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+html.light {
+  color-scheme: light;
+
+  --t-bg: #f8f9fa;
+  --t-surface: #ffffff;
+  --t-surface-2: #1b1c200a;        /* ink at 4% — sits on page and card alike */
+  --t-surface-elevated: #ffffff;
+  --t-border: rgb(27 28 32 / 8%);
+  --t-border-strong: rgb(27 28 32 / 50%); /* ≥3:1 on white */
+
+  --t-text: #1b1c20;
+  --t-text-muted: #5c5f67;
+  --t-text-soft: #6b6e76;          /* 4.6:1 on surface-2 */
+
+  --t-primary: #1b1c20;            /* the dark CTA with light text */
+  --t-primary-hover: #2f3036;
+  --t-primary-soft: rgb(27 28 32 / 12%);
+  --t-primary-fg: #f8f9fa;
+  --t-ring: #6b6e76;
+
+  --t-inverse: #1b1c20;
+  --t-inverse-fg: #f8f9fa;
+
+  --t-backdrop: #0b0c0e;
+  --t-on-backdrop: #ffffff;
+
+  --t-danger: #c3312a;
+  --t-danger-soft: #fae7e6;
+  --t-warm: #7d5a0b;
+  --t-warm-soft: #fcf4e3;
+  --t-info: #2b64d6;
+  --t-info-soft: #e6edfb;
+  --t-success: #1a7a46;
+  --t-success-soft: #e4f3eb;
+
+  --t-chart-1: #2b64d6;
+  --t-chart-2: #1a7a46;
+
+  --t-sidebar: #f8f9fa;
+  --t-sidebar-fg: #5c5f67;
+  --t-sidebar-fg-strong: #1b1c20;
+  --t-sidebar-hover: rgb(27 28 32 / 4%);
+  --t-sidebar-accent: #1b1c200a;
+  --t-sidebar-border: rgb(27 28 32 / 8%);
+
+  --t-shadow-sm: 0 1px 2px rgb(27 28 32 / 4%), 0 1px 3px rgb(27 28 32 / 6%);
+  --t-shadow-md: 0 4px 12px rgb(27 28 32 / 8%);
+  --t-shadow-lg: 0 18px 44px rgb(27 28 32 / 10%);
+  --t-shadow-popover: 0 8px 32px rgb(27 28 32 / 14%);
+
+  --t-select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6e76' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Base styles live in @layer base so Tailwind utility classes (which live
+   in @layer utilities) can override them. */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  /* A horizontal scroller must never propagate its layout overflow to the
+     document: iOS WebKit pans the whole page otherwise, and it does NOT
+     honor body overflow-x:clip at the viewport. contain:paint severs the
+     propagation at the source. Applies to every overflow-x-auto scroller by
+     design (they are all deliberate scroll containers). */
+  .overflow-x-auto {
+    contain: paint;
+  }
+
+  body {
+    margin: 0;
+    /* The page NEVER pans horizontally (wide content scrolls inside its
+       own container). `clip` — not `hidden`, which would make body a scroll
+       container and break position:sticky descendants. */
+    overflow-x: clip;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    color: var(--color-accent-deep);
+  }
+
+  /* Tailwind v4 dropped the default `cursor: pointer` on buttons; restore it
+     so every clickable button feels clickable. */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Component classes live in @layer components so Tailwind utilities (in
+   @layer utilities, which sorts after components) can override them on the
+   same element. */
+@layer components {
+  /* Form primitives */
+  .form-grid { display: grid; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 13px; font-weight: 500; color: var(--color-text-muted); }
+  .form-hint { font-size: 12px; color: var(--color-text-soft); }
+  .form-input,
+  .form-textarea,
+  .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  /* Selects only: custom chevron (appearance: none) so it sits 14px off the
+     right edge instead of hugging it. The data URI lives in layer C (per
+     theme) because var() can't reach inside it. */
+  .form-select {
+    appearance: none;
+    padding-right: 36px;
+    background-image: var(--t-select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+  }
+  .form-textarea { min-height: 80px; resize: vertical; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+  @media (max-width: 640px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* The topbar's glass: the page color at 80% over a 12px backdrop blur, so
+     content scrolling underneath shows through softened; the hairline below
+     keeps the edge. Solid again for people who prefer reduced transparency. */
+  .topbar-glass {
+    background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .topbar-glass {
+      background: var(--color-surface);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /* The rail's scroll region: a thin, quiet scrollbar in the rail's own
+     ink, on a transparent track. */
+  .rail-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--color-sidebar-fg) 40%, transparent) transparent;
+  }
+  .rail-scroll::-webkit-scrollbar { width: 6px; }
+  .rail-scroll::-webkit-scrollbar-track { background: transparent; }
+  .rail-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-sidebar-fg) 40%, transparent);
+    border-radius: 999px;
+  }
+  .rail-scroll::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-sidebar-fg) 60%, transparent);
+  }
+
+  /* Empty state — bg-surface, dashed border, 60/20 padding */
+  .empty-card {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--color-text-soft);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-md);
+  }
+  .empty-card h3 {
+    color: var(--color-text);
+    margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 14px;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  /* A floor for labeled buttons: primary and secondary never read narrower
+     than a word and a half. Ghost buttons and icon tiles stay content-sized;
+     an icon-only primary/secondary opts out with `min-w-0`. */
+  .btn-primary, .btn-secondary { min-width: 96px; }
+  .btn-primary { background: var(--color-primary); color: var(--color-primary-foreground); }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    text-decoration: none;
+  }
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border-strong);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-surface-2);
+    text-decoration: none;
+  }
+  .btn-ghost { color: var(--color-text-muted); padding: 6px 10px; }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-block { width: 100%; }
+  .btn-danger { color: var(--color-danger); }
+  .btn-danger:hover:not(:disabled) {
+    background: var(--color-danger-soft);
+  }
+}
+
+/* SideSheet / modal entrance */
+@keyframes sheet-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+.animate-sheet-in {
+  animation: sheet-in 0.18s ease-out;
+}
+@keyframes sheet-center {
+  from {
+    transform: scale(0.98);
+    opacity: 0;
+  }
+}
+.animate-sheet-center {
+  animation: sheet-center 0.15s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.45s ease-out;
+}
+
+/* HoverTip, delayed register — a tip on a control you click constantly
+   should not fire the instant the pointer crosses it. The element is
+   revealed on hover as usual and starts transparent; the animation's 1s
+   delay is the wait, and `forwards` holds it visible afterwards. `to` must
+   be explicit: this element declares `opacity: 0` on itself to cover the
+   delay, so an implicit `to` would resolve to that same 0. */
+@keyframes hover-tip-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.hover-tip-delayed {
+  opacity: 0;
+  animation: hover-tip-in 0.12s ease-out 1s forwards;
+}
